@@ -7,7 +7,10 @@ with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track1_center_driving.
     reader = csv.reader(csvfile)
     for line in reader:
         lines.append(line)
-
+with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track1_recovery_lap.csv') as csvfile1:
+	reader = csv.reader(csvfile1)
+	for line in reader:
+		lines.append(line)
 from sklearn.model_selection import train_test_split
 
 train_samples,validation_samples=train_test_split(lines,test_size=0.2)
@@ -36,7 +39,7 @@ train_samples,validation_samples=train_test_split(lines,test_size=0.2)
 
 def generator(samples,batch_size=32):
 	num_examples=len(samples)
-	steer_correction=0.18
+	steer_correction=0.20
 	while 1:
 		shuffle(samples)
 		for offset in range(0,num_examples,batch_size):
@@ -47,13 +50,17 @@ def generator(samples,batch_size=32):
 				path1=row[0]
 				path2=row[1]
 				path3=row[2]
-				center_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_center_driving/'+path1.split('/')[-1]
-				left_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_center_driving/'+path2.split('/')[-1]
-				right_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_center_driving/'+path3.split('/')[-1]
+				center_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_w_center_recovery_lap/'+path1.split('/')[-1]
+				left_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_w_center_recovery_lap/'+path2.split('/')[-1]
+				right_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_w_center_recovery_lap/'+path3.split('/')[-1]
 				center_img=cv2.imread(center_img_path)
 				center_img_flip=np.fliplr(center_img)
 				left_img=cv2.imread(left_img_path)
 				right_img=cv2.imread(right_img_path)
+				center_img=center_img[:,:,::-1]
+				left_img=left_img[:,:,::-1]
+				right_img=right_img[:,:,::-1]
+				center_img_flip=center_img_flip[:,:,::-1]
 				center_ang = float(row[3])
 				car_images.append(center_img)
 				steer_ang.append(center_ang)
@@ -101,7 +108,7 @@ model.add(Dense(1))
 
 model.compile(loss='mse',optimizer='adam')
 
-model.fit_generator(train_generator,samples_per_epoch=len(train_samples),validation_data=validation_generator,nb_val_samples=len(validation_samples),nb_epoch=3)
+model.fit_generator(train_generator,samples_per_epoch=len(train_samples),validation_data=validation_generator,nb_val_samples=len(validation_samples),nb_epoch=4)
 
 model.save('model.h5')
 exit()
