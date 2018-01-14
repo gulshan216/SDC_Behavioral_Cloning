@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from sklearn.utils import shuffle
 lines = []
-with open('../driving_log.csv') as csvfile:
+with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track1_center_driving.csv') as csvfile:
     reader = csv.reader(csvfile)
     for line in reader:
         lines.append(line)
@@ -47,16 +47,18 @@ def generator(samples,batch_size=32):
 				path1=row[0]
 				path2=row[1]
 				path3=row[2]
-				center_img_path='../IMG/'+path1.split('/')[-1]
-				left_img_path='../IMG/'+path2.split('/')[-1]
-				right_img_path='../IMG/'+path3.split('/')[-1]
+				center_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_center_driving/'+path1.split('/')[-1]
+				left_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_center_driving/'+path2.split('/')[-1]
+				right_img_path='/home/carnd/SDC_Behavioral_Cloning/IMG_track1_center_driving/'+path3.split('/')[-1]
 				center_img=cv2.imread(center_img_path)
-				center_img_flip=cv2.flip(center_img,axis=1)
+				center_img_flip=np.fliplr(center_img)
 				left_img=cv2.imread(left_img_path)
 				right_img=cv2.imread(right_img_path)
 				center_ang = float(row[3])
-				car_images.extend(center_img,center_img_flip,left_img,right_img)
-				steer_ang.extend(center_ang,-center_ang,center_ang-steer_correction,center_ang+steer_correction)
+				car_images.append(center_img)
+				steer_ang.append(center_ang)
+				#car_images.extend(center_img,center_img_flip,left_img,right_img)
+				#steer_ang.extend(center_ang,-center_ang,center_ang-steer_correction,center_ang+steer_correction)
 
 			X_train = np.array(car_images)
 			y_train = np.array(steer_ang)
@@ -77,7 +79,7 @@ from keras.layers import Cropping2D
 
 model=Sequential()
 
-model.add(Lambda(lambda x: (x/255.0) - 0.5),input_shape=(3,160,320))
+model.add(Lambda(lambda x: (x/255.0) - 0.5,input_shape=(160,320,3)))
 model.add(Cropping2D(cropping=((70,25),(0,0))))
 model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
 model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
