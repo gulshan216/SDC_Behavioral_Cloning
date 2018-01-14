@@ -36,7 +36,7 @@ train_samples,validation_samples=train_test_split(lines,test_size=0.2)
 
 def generator(samples,batch_size=32):
 	num_examples=len(samples)
-	steer_correction=0.3
+	steer_correction=0.18
 	while 1:
 		shuffle(samples)
 		for offset in range(0,num_examples,batch_size):
@@ -57,6 +57,12 @@ def generator(samples,batch_size=32):
 				center_ang = float(row[3])
 				car_images.append(center_img)
 				steer_ang.append(center_ang)
+				car_images.append(left_img)
+				steer_ang.append(center_ang+steer_correction)
+				car_images.append(right_img)
+				steer_ang.append(center_ang-steer_correction)
+				car_images.append(center_img_flip)
+				steer_ang.append(-center_ang)
 				#car_images.extend(center_img,center_img_flip,left_img,right_img)
 				#steer_ang.extend(center_ang,-center_ang,center_ang-steer_correction,center_ang+steer_correction)
 
@@ -95,7 +101,7 @@ model.add(Dense(1))
 
 model.compile(loss='mse',optimizer='adam')
 
-model.fit_generator(train_generator,samples_per_epoch=len(train_samples),validation_data=validation_generator,nb_val_samples=len(validation_samples),nb_epoch=5)
+model.fit_generator(train_generator,samples_per_epoch=len(train_samples),validation_data=validation_generator,nb_val_samples=len(validation_samples),nb_epoch=3)
 
 model.save('model.h5')
 exit()
