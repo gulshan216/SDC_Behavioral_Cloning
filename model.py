@@ -11,6 +11,11 @@ with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track1_recovery_lap.cs
 	reader = csv.reader(csvfile1)
 	for line in reader:
 		lines.append(line)
+with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track1_additional_lap.csv') as csvfile1:
+        reader = csv.reader(csvfile1)
+        for line in reader:
+                lines.append(line)
+
 from sklearn.model_selection import train_test_split
 
 train_samples,validation_samples=train_test_split(lines,test_size=0.2)
@@ -103,12 +108,14 @@ model.add(Flatten())
 model.add(Dense(1164))
 model.add(Dense(100))
 model.add(Dense(50))
+model.add(Dropout(0.6))
 model.add(Dense(10))
+model.add(Dropout(0.5))
 model.add(Dense(1))
 
 model.compile(loss='mse',optimizer='adam')
 
-model.fit_generator(train_generator,samples_per_epoch=len(train_samples),validation_data=validation_generator,nb_val_samples=len(validation_samples),nb_epoch=4)
+model.fit_generator(train_generator,samples_per_epoch=len(train_samples),validation_data=validation_generator,nb_val_samples=len(validation_samples),nb_epoch=2)
 
 model.save('model.h5')
 exit()
