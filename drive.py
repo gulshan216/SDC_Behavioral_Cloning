@@ -44,9 +44,25 @@ class SimplePIController:
 
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 9
+set_speed = 10
 controller.set_desired(set_speed)
 
+#Added preprocessing to the test images as well
+import cv2
+
+resized_shape=(64,64)
+
+def crop_resize_img(img):
+    return cv2.resize(img[60:135], resized_shape, interpolation=cv2.INTER_AREA)
+
+def preprocess(img):
+    img=crop_resize_img(img)
+    for i in range(img.shape[2]):
+        img[:,:,i] = cv2.equalizeHist(img[:,:,i])
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+    return img
+#Prerocessing Ends
 
 @sio.on('telemetry')
 def telemetry(sid, data):
@@ -61,6 +77,10 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         image_array = np.asarray(image)
+        
+        #Preprocess the image before sending it to the model
+        image_array = preprocess(image_array)
+
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
