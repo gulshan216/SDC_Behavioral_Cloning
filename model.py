@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from sklearn.utils import shuffle
 lines = []
+#Read the csv files
 with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track1_center_driving.csv') as csvfile:
     reader = csv.reader(csvfile)
     for line in reader:
@@ -20,11 +21,12 @@ with open('/home/carnd/SDC_Behavioral_Cloning/driving_log_track2_center_driving.
     for line in reader:
         lines.append(line)
 
-
+#Split the data into training and validation sets
 from sklearn.model_selection import train_test_split
 
 train_samples,validation_samples=train_test_split(lines,test_size=0.3)
 
+#Small but Random translation,rotation and brightness change in the images
 import random
 import cv2
 import numpy as np
@@ -95,7 +97,7 @@ def augment_image(img):
 # images.append(image)
 # measurements.append(0.359026)
 
-
+#Generator functions
 def training_generator(samples,batch_size=32):
 	num_examples=len(samples)
 	steer_correction=0.20
@@ -173,6 +175,7 @@ validation_generator=valid_generator(validation_samples,batch_size=32)
 # measurements_new=np.array(measurements)
 # print(images_new.shape)
 
+#NVIDIA model
 from keras.models import Sequential
 from keras.layers.core import Flatten,Dense,Lambda,Dropout,Activation
 from keras.layers.convolutional import Convolution2D
